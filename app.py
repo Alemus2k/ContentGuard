@@ -546,7 +546,7 @@ def show_dashboard():
     
     with col3:
         avg_confidence = recent_data['confidence_score'].mean()
-        confidence_display = f"{avg_confidence:.2f}" if not pd.isna(avg_confidence) else "N/A"
+        confidence_display = f"{avg_confidence*100:.1f}%" if not pd.isna(avg_confidence) else "N/A"
         confidence_color = "#4CAF50" if avg_confidence < 0.5 else "#ff9800" if avg_confidence < 0.7 else "#f44336"
         st.markdown(
             f'<div class="metric-container">'
@@ -626,7 +626,7 @@ def show_dashboard():
             
             with st.expander(
                 f"🔍 {item['content_type'].title()} Content - "
-                f"Confidence: {item['confidence_score']:.2f} - "
+                f"Confidence: {item['confidence_score']*100:.1f}% - "
                 f"{format_timestamp(item['timestamp'])}"
             ):
                 # Create a modern card layout
@@ -664,7 +664,7 @@ def show_dashboard():
                     # Confidence score with color
                     st.markdown(
                         f'<p><strong>🎯 Confidence:</strong> '
-                        f'<span class="confidence-{confidence_class}">{item["confidence_score"]:.2f}</span></p>',
+                        f'<span class="confidence-{confidence_class}">{item["confidence_score"]*100:.1f}%</span></p>',
                         unsafe_allow_html=True
                     )
                     
@@ -793,7 +793,7 @@ def show_batch_analysis_tab():
                 results.append({
                     'text': text[:100] + '...' if len(text) > 100 else text,
                     'inappropriate': '🚨 Yes' if result['is_inappropriate'] else '✅ No',
-                    'confidence': f"{result['confidence_score']:.2f}",
+                    'confidence': f"{result['confidence_score']*100:.1f}%",
                     'reasons': ', '.join(result['reasons']) if result['reasons'] else 'None'
                 })
                 
@@ -837,7 +837,7 @@ def display_text_results(result, content, filename=None):
         f'<div style="display: flex; justify-content: space-between; align-items: center;">'
         f'<h2 style="margin: 0; color: #2c3e50;">{status_emoji} {status_text}</h2>'
         f'<div style="text-align: right;">'
-        f'<h3 style="margin: 0; color: {confidence_color};">Confidence: {result["confidence_score"]:.2f}</h3>'
+        f'<h3 style="margin: 0; color: {confidence_color};">Confidence: {result["confidence_score"]*100:.1f}%</h3>'
         f'</div>'
         f'</div>'
         f'</div>',
@@ -981,7 +981,7 @@ def display_image_results(result, filename):
         f'<div style="display: flex; justify-content: space-between; align-items: center;">'
         f'<h2 style="margin: 0; color: #2c3e50;">{status_emoji} {status_text}</h2>'
         f'<div style="text-align: right;">'
-        f'<h3 style="margin: 0; color: {confidence_color};">Confidence: {result["confidence_score"]:.2f}</h3>'
+        f'<h3 style="margin: 0; color: {confidence_color};">Confidence: {result["confidence_score"]*100:.1f}%</h3>'
         f'</div>'
         f'</div>'
         f'</div>',
@@ -1124,7 +1124,7 @@ def display_video_results(result, filename):
         f'<div style="display: flex; justify-content: space-between; align-items: center;">'
         f'<h2 style="margin: 0; color: #2c3e50;">{status_emoji} {status_text}</h2>'
         f'<div style="text-align: right;">'
-        f'<h3 style="margin: 0; color: {confidence_color};">Confidence: {result["confidence_score"]:.2f}</h3>'
+        f'<h3 style="margin: 0; color: {confidence_color};">Confidence: {result["confidence_score"]*100:.1f}%</h3>'
         f'</div>'
         f'</div>'
         f'</div>',
@@ -1182,7 +1182,7 @@ def display_video_results(result, filename):
                 st.markdown(
                     f'<div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin: 0.5rem 0; border-left: 3px solid {confidence_color};">'
                     f'<strong>🕰️ Frame at {frame["timestamp"]:.1f}s</strong><br>'
-                    f'<span style="color: {confidence_color};">Confidence: {frame["confidence_score"]:.2f}</span>'
+                    f'<span style="color: {confidence_color};">Confidence: {frame["confidence_score"]*100:.1f}%</span>'
                     f'</div>',
                     unsafe_allow_html=True
                 )
@@ -1294,7 +1294,7 @@ def show_content_review():
                     # Analysis details
                     result_emoji = "🚨" if item['is_inappropriate'] else "✅"
                     st.markdown(f"**{result_emoji} Analysis Result:** {'Inappropriate' if item['is_inappropriate'] else 'Appropriate'}")
-                    st.markdown(f"**🎯 Confidence:** {item['confidence_score']:.2f}")
+                    st.markdown(f"**🎯 Confidence:** {item['confidence_score']*100:.1f}%")
                     
                     if item['reasons']:
                         st.markdown("**⚠️ Reasons:**")
@@ -1398,7 +1398,7 @@ def show_analytics():
         confidence_color = "#4CAF50" if avg_confidence < 0.5 else "#ff9800" if avg_confidence < 0.7 else "#f44336"
         st.markdown(
             f'<div class="metric-container">'
-            f'<h3 style="color: {confidence_color}; margin: 0;">🎯 {avg_confidence:.2f}</h3>'
+            f'<h3 style="color: {confidence_color}; margin: 0;">🎯 {avg_confidence*100:.1f}%</h3>'
             f'<p style="margin: 0; color: #666;">Avg Confidence</p>'
             f'</div>',
             unsafe_allow_html=True
