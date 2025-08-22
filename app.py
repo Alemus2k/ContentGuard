@@ -362,7 +362,7 @@ def main():
     )
     
     # Sleek sidebar navigation without emojis
-    st.sidebar.markdown('<h2 style="color: white; text-align: center; margin-bottom: 2rem; font-weight: 300;">Navigation</h2>', unsafe_allow_html=True)
+    st.sidebar.markdown('<h1 style="color: white; text-align: center; margin-bottom: 2rem; font-weight: 700; font-size: 2rem;">Navigation</h1>', unsafe_allow_html=True)
     
     pages = {
         "Dashboard": "Dashboard",
