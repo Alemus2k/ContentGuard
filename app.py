@@ -96,36 +96,90 @@ def load_css():
         color: white;
     }
     
-    /* Enhanced buttons with better visibility */
-    .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        color: white !important;
-        border: none !important;
+    /* Enhanced buttons with better visibility for all modes */
+    .stButton > button,
+    div[data-testid="stButton"] > button,
+    .stButton button,
+    button[kind="primary"],
+    button[kind="secondary"] {
+        background: #4f46e5 !important;
+        background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: #ffffff !important;
+        border: 2px solid #4f46e5 !important;
         border-radius: 25px !important;
         padding: 0.75rem 2rem !important;
         font-weight: 600 !important;
+        font-size: 14px !important;
         transition: all 0.3s ease !important;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3) !important;
         text-decoration: none !important;
+        cursor: pointer !important;
     }
     
-    .stButton > button:hover {
+    .stButton > button:hover,
+    div[data-testid="stButton"] > button:hover,
+    .stButton button:hover,
+    button[kind="primary"]:hover,
+    button[kind="secondary"]:hover {
+        background: #3730a3 !important;
+        background-image: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+        color: #ffffff !important;
         transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
-        background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
-        color: white !important;
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4) !important;
+        border-color: #3730a3 !important;
     }
     
-    .stButton > button:focus {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        color: white !important;
+    .stButton > button:focus,
+    div[data-testid="stButton"] > button:focus,
+    .stButton button:focus,
+    button[kind="primary"]:focus,
+    button[kind="secondary"]:focus {
+        background: #4f46e5 !important;
+        background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: #ffffff !important;
         outline: none !important;
-        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.5) !important;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.5) !important;
+        border-color: #4f46e5 !important;
     }
     
-    .stButton > button:active {
-        background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
-        color: white !important;
+    .stButton > button:active,
+    div[data-testid="stButton"] > button:active,
+    .stButton button:active,
+    button[kind="primary"]:active,
+    button[kind="secondary"]:active {
+        background: #3730a3 !important;
+        background-image: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+        color: #ffffff !important;
+        transform: translateY(-1px) !important;
+        border-color: #3730a3 !important;
+    }
+    
+    /* Force text color in all possible scenarios */
+    .stButton > button span,
+    div[data-testid="stButton"] > button span,
+    .stButton button span,
+    button[kind="primary"] span,
+    button[kind="secondary"] span,
+    .stButton > button p,
+    div[data-testid="stButton"] > button p,
+    .stButton button p,
+    button[kind="primary"] p,
+    button[kind="secondary"] p {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Override Streamlit's default button styling more aggressively */
+    [data-testid="stApp"] button {
+        background: #4f46e5 !important;
+        color: #ffffff !important;
+        border: 2px solid #4f46e5 !important;
+    }
+    
+    [data-testid="stApp"] button:hover {
+        background: #3730a3 !important;
+        color: #ffffff !important;
+        border: 2px solid #3730a3 !important;
     }
     
     /* File uploader styling */
@@ -583,7 +637,7 @@ def show_text_input_tab():
     
     col1, col2, col3 = st.columns([1, 1, 2])
     with col2:
-        analyze_button = st.button("🔍 Analyze Text", use_container_width=True)
+        analyze_button = st.button("🔍 Analyze Text", use_container_width=True, type="primary")
     
     if analyze_button and text_content:
         with st.spinner("🤖 Analyzing text content..."):
@@ -617,7 +671,7 @@ def show_file_upload_tab():
         
         col1, col2, col3 = st.columns([1, 1, 2])
         with col2:
-            analyze_button = st.button("🔍 Analyze File", use_container_width=True)
+            analyze_button = st.button("🔍 Analyze File", use_container_width=True, type="primary")
         
         if analyze_button:
             try:
@@ -652,7 +706,7 @@ def show_batch_analysis_tab():
     
     col1, col2, col3 = st.columns([1, 1, 2])
     with col2:
-        analyze_button = st.button("🔍 Analyze Batch", use_container_width=True)
+        analyze_button = st.button("🔍 Analyze Batch", use_container_width=True, type="primary")
     
     if analyze_button and batch_text:
         texts = [line.strip() for line in batch_text.split('\n') if line.strip()]
@@ -816,7 +870,7 @@ def show_image_analysis():
             )
             
             st.markdown('<br>', unsafe_allow_html=True)
-            analyze_button = st.button("🔍 Analyze Image", use_container_width=True)
+            analyze_button = st.button("🔍 Analyze Image", use_container_width=True, type="primary")
         
         if analyze_button:
             with st.spinner("🤖 Analyzing image content..."):
@@ -955,7 +1009,7 @@ def show_video_analysis():
         with col3:
             st.markdown('<div class="metric-card">', unsafe_allow_html=True)
             st.markdown('<br>', unsafe_allow_html=True)
-            analyze_button = st.button("🔍 Analyze Video", use_container_width=True)
+            analyze_button = st.button("🔍 Analyze Video", use_container_width=True, type="primary")
             st.markdown('</div>', unsafe_allow_html=True)
         
         if analyze_button:
