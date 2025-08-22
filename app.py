@@ -96,22 +96,25 @@ def load_css():
         color: white;
     }
     
-    /* Enhanced buttons with better visibility for all modes */
+    /* Enhanced buttons with solid blue background for all modes */
     .stButton > button,
     div[data-testid="stButton"] > button,
     .stButton button,
     button[kind="primary"],
-    button[kind="secondary"] {
-        background: #4f46e5 !important;
-        background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    button[kind="secondary"],
+    [data-testid="stApp"] button,
+    button {
+        background: #2563eb !important;
+        background-image: none !important;
+        background-color: #2563eb !important;
         color: #ffffff !important;
-        border: 2px solid #4f46e5 !important;
+        border: 2px solid #2563eb !important;
         border-radius: 25px !important;
         padding: 0.75rem 2rem !important;
         font-weight: 600 !important;
         font-size: 14px !important;
         transition: all 0.3s ease !important;
-        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3) !important;
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3) !important;
         text-decoration: none !important;
         cursor: pointer !important;
     }
@@ -120,38 +123,47 @@ def load_css():
     div[data-testid="stButton"] > button:hover,
     .stButton button:hover,
     button[kind="primary"]:hover,
-    button[kind="secondary"]:hover {
-        background: #3730a3 !important;
-        background-image: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+    button[kind="secondary"]:hover,
+    [data-testid="stApp"] button:hover,
+    button:hover {
+        background: #1d4ed8 !important;
+        background-image: none !important;
+        background-color: #1d4ed8 !important;
         color: #ffffff !important;
         transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4) !important;
-        border-color: #3730a3 !important;
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4) !important;
+        border-color: #1d4ed8 !important;
     }
     
     .stButton > button:focus,
     div[data-testid="stButton"] > button:focus,
     .stButton button:focus,
     button[kind="primary"]:focus,
-    button[kind="secondary"]:focus {
-        background: #4f46e5 !important;
-        background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    button[kind="secondary"]:focus,
+    [data-testid="stApp"] button:focus,
+    button:focus {
+        background: #2563eb !important;
+        background-image: none !important;
+        background-color: #2563eb !important;
         color: #ffffff !important;
         outline: none !important;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.5) !important;
-        border-color: #4f46e5 !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.5) !important;
+        border-color: #2563eb !important;
     }
     
     .stButton > button:active,
     div[data-testid="stButton"] > button:active,
     .stButton button:active,
     button[kind="primary"]:active,
-    button[kind="secondary"]:active {
-        background: #3730a3 !important;
-        background-image: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+    button[kind="secondary"]:active,
+    [data-testid="stApp"] button:active,
+    button:active {
+        background: #1e40af !important;
+        background-image: none !important;
+        background-color: #1e40af !important;
         color: #ffffff !important;
         transform: translateY(-1px) !important;
-        border-color: #3730a3 !important;
+        border-color: #1e40af !important;
     }
     
     /* Force text color in all possible scenarios */
@@ -164,22 +176,42 @@ def load_css():
     div[data-testid="stButton"] > button p,
     .stButton button p,
     button[kind="primary"] p,
-    button[kind="secondary"] p {
+    button[kind="secondary"] p,
+    [data-testid="stApp"] button span,
+    [data-testid="stApp"] button p,
+    button span,
+    button p {
         color: #ffffff !important;
         font-weight: 600 !important;
     }
     
-    /* Override Streamlit's default button styling more aggressively */
-    [data-testid="stApp"] button {
-        background: #4f46e5 !important;
-        color: #ffffff !important;
-        border: 2px solid #4f46e5 !important;
-    }
-    
-    [data-testid="stApp"] button:hover {
-        background: #3730a3 !important;
-        color: #ffffff !important;
-        border: 2px solid #3730a3 !important;
+    /* Additional dark mode overrides */
+    @media (prefers-color-scheme: dark) {
+        .stButton > button,
+        div[data-testid="stButton"] > button,
+        .stButton button,
+        button[kind="primary"],
+        button[kind="secondary"],
+        [data-testid="stApp"] button,
+        button {
+            background: #2563eb !important;
+            background-color: #2563eb !important;
+            color: #ffffff !important;
+            border-color: #2563eb !important;
+        }
+        
+        .stButton > button:hover,
+        div[data-testid="stButton"] > button:hover,
+        .stButton button:hover,
+        button[kind="primary"]:hover,
+        button[kind="secondary"]:hover,
+        [data-testid="stApp"] button:hover,
+        button:hover {
+            background: #1d4ed8 !important;
+            background-color: #1d4ed8 !important;
+            color: #ffffff !important;
+            border-color: #1d4ed8 !important;
+        }
     }
     
     /* File uploader styling */
