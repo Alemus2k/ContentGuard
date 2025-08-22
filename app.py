@@ -34,21 +34,61 @@ def load_css():
         color: white;
     }
     
-    /* Custom card styling */
+    /* Custom card styling with dark mode support */
     .metric-card {
-        background: white;
+        background: #2563eb !important;
+        background-image: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+        color: #ffffff !important;
         padding: 1.5rem;
         border-radius: 15px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(37, 99, 235, 0.3);
+        border: 1px solid rgba(37, 99, 235, 0.5);
         backdrop-filter: blur(10px);
         margin: 0.5rem 0;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
     }
     
     .metric-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 12px 40px rgba(37, 99, 235, 0.4);
+        background: #1e40af !important;
+        background-image: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%) !important;
+    }
+    
+    .metric-card h4,
+    .metric-card h3,
+    .metric-card h2,
+    .metric-card h1,
+    .metric-card p,
+    .metric-card span,
+    .metric-card div {
+        color: #ffffff !important;
+    }
+    
+    /* Ensure metric cards work in dark mode */
+    @media (prefers-color-scheme: dark) {
+        .metric-card {
+            background: #2563eb !important;
+            background-image: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+            color: #ffffff !important;
+            border-color: rgba(37, 99, 235, 0.5);
+        }
+        
+        .metric-card:hover {
+            background: #1e40af !important;
+            background-image: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%) !important;
+        }
+        
+        .metric-card h4,
+        .metric-card h3,
+        .metric-card h2,
+        .metric-card h1,
+        .metric-card p,
+        .metric-card span,
+        .metric-card div {
+            color: #ffffff !important;
+        }
     }
     
     /* Status badges */
