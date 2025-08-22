@@ -96,21 +96,36 @@ def load_css():
         color: white;
     }
     
-    /* Enhanced buttons */
+    /* Enhanced buttons with better visibility */
     .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        border-radius: 25px;
-        padding: 0.75rem 2rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 25px !important;
+        padding: 0.75rem 2rem !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+        text-decoration: none !important;
     }
     
     .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+        background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+        color: white !important;
+    }
+    
+    .stButton > button:focus {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        outline: none !important;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.5) !important;
+    }
+    
+    .stButton > button:active {
+        background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+        color: white !important;
     }
     
     /* File uploader styling */
@@ -220,22 +235,58 @@ def main():
         unsafe_allow_html=True
     )
     
-    # Modern sidebar navigation with icons
-    st.sidebar.markdown('<h2 style="color: white; text-align: center; margin-bottom: 2rem;">📱 Navigation</h2>', unsafe_allow_html=True)
+    # Sleek sidebar navigation without emojis
+    st.sidebar.markdown('<h2 style="color: white; text-align: center; margin-bottom: 2rem; font-weight: 300;">Navigation</h2>', unsafe_allow_html=True)
     
     pages = {
-        "📊 Dashboard": "Dashboard",
-        "📝 Text Analysis": "Text Analysis", 
-        "🖼️ Image Analysis": "Image Analysis",
-        "🎥 Video Analysis": "Video Analysis",
-        "🔍 Content Review": "Content Review",
-        "📈 Analytics": "Analytics"
+        "Dashboard": "Dashboard",
+        "Text Analysis": "Text Analysis", 
+        "Image Analysis": "Image Analysis",
+        "Video Analysis": "Video Analysis",
+        "Content Review": "Content Review",
+        "Analytics": "Analytics"
     }
     
-    # Create navigation buttons
+    # Add custom CSS for sleek sidebar buttons
+    st.sidebar.markdown("""
+    <style>
+    .sidebar-nav-button {
+        display: block;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        margin: 0.25rem 0;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-align: left;
+    }
+    
+    .sidebar-nav-button:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.4);
+        transform: translateX(3px);
+        color: white;
+    }
+    
+    .sidebar-nav-button.active {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8));
+        border-color: rgba(255, 255, 255, 0.3);
+        color: white;
+        font-weight: 600;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Create sleek navigation buttons
     page = None
-    for icon_label, page_name in pages.items():
-        if st.sidebar.button(icon_label, key=f"nav_{page_name}", use_container_width=True):
+    for page_name in pages.keys():
+        button_class = "sidebar-nav-button active" if st.session_state.get('current_page') == page_name else "sidebar-nav-button"
+        if st.sidebar.button(page_name, key=f"nav_{page_name}", use_container_width=True):
             st.session_state.current_page = page_name
     
     # Get current page from session state or default to Dashboard
@@ -247,17 +298,39 @@ def main():
     # Add some spacing
     st.sidebar.markdown("<br><br>", unsafe_allow_html=True)
     
-    # Quick stats in sidebar
+    # Quick stats in sidebar with sleek styling
     recent_data = st.session_state.data_manager.get_recent_analysis(hours=24)
     if not recent_data.empty:
-        st.sidebar.markdown('<h4 style="color: white;">📊 Quick Stats (24h)</h4>', unsafe_allow_html=True)
+        st.sidebar.markdown('<h4 style="color: white; font-weight: 300; margin-top: 2rem;">Quick Stats (24h)</h4>', unsafe_allow_html=True)
         total_items = len(recent_data)
         flagged_items = len(recent_data[recent_data['is_inappropriate'] == True])
-        st.sidebar.metric("Total Items", total_items)
-        st.sidebar.metric("Flagged Items", flagged_items)
+        
+        # Custom styled metrics
+        st.sidebar.markdown(
+            f'<div style="background: rgba(255,255,255,0.1); padding: 0.75rem; border-radius: 8px; margin: 0.5rem 0;">'
+            f'<div style="color: #4CAF50; font-size: 1.5rem; font-weight: 600;">{total_items}</div>'
+            f'<div style="color: rgba(255,255,255,0.8); font-size: 0.875rem;">Total Items</div>'
+            f'</div>', 
+            unsafe_allow_html=True
+        )
+        
+        st.sidebar.markdown(
+            f'<div style="background: rgba(255,255,255,0.1); padding: 0.75rem; border-radius: 8px; margin: 0.5rem 0;">'
+            f'<div style="color: #f44336; font-size: 1.5rem; font-weight: 600;">{flagged_items}</div>'
+            f'<div style="color: rgba(255,255,255,0.8); font-size: 0.875rem;">Flagged Items</div>'
+            f'</div>', 
+            unsafe_allow_html=True
+        )
+        
         if total_items > 0:
             percentage = (flagged_items / total_items) * 100
-            st.sidebar.metric("Flag Rate", f"{percentage:.1f}%")
+            st.sidebar.markdown(
+                f'<div style="background: rgba(255,255,255,0.1); padding: 0.75rem; border-radius: 8px; margin: 0.5rem 0;">'
+                f'<div style="color: #ff9800; font-size: 1.5rem; font-weight: 600;">{percentage:.1f}%</div>'
+                f'<div style="color: rgba(255,255,255,0.8); font-size: 0.875rem;">Flag Rate</div>'
+                f'</div>', 
+                unsafe_allow_html=True
+            )
     
     # Route to the selected page
     if current_page == "Dashboard":
