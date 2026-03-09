@@ -13,6 +13,11 @@ from modules.image_analyzer import ImageAnalyzer
 from modules.video_analyzer import VideoAnalyzer
 from modules.data_manager import DataManager
 from modules.utils import get_confidence_color, format_timestamp
+from modules.input_validator import (
+    sanitize_text, validate_text_input, validate_image_upload,
+    validate_video_upload, validate_batch_text, sanitize_filename
+)
+from modules.rate_limiter import RateLimiter
 
 # Custom CSS for modern styling
 def load_css():
@@ -340,6 +345,8 @@ if 'image_analyzer' not in st.session_state:
     st.session_state.image_analyzer = ImageAnalyzer()
 if 'video_analyzer' not in st.session_state:
     st.session_state.video_analyzer = VideoAnalyzer()
+if 'rate_limiter' not in st.session_state:
+    st.session_state.rate_limiter = RateLimiter(max_requests=20, window_seconds=60)
 
 def main():
     st.set_page_config(
@@ -712,20 +719,27 @@ def show_text_input_tab():
         analyze_button = st.button("🔍 Analyze Text", use_container_width=True, type="primary")
     
     if analyze_button and text_content:
-        with st.spinner("🤖 Analyzing text content..."):
-            result = st.session_state.text_analyzer.analyze(text_content)
-            
-            # Store result
-            st.session_state.data_manager.store_analysis_result(
-                content_type='text',
-                content=text_content,
-                is_inappropriate=result['is_inappropriate'],
-                confidence_score=result['confidence_score'],
-                reasons=result['reasons']
-            )
-            
-            # Display results
-            display_text_results(result, text_content)
+        valid, errors = validate_text_input(text_content)
+        if not valid:
+            for error in errors:
+                st.error(f"Validation error: {error}")
+        elif not st.session_state.rate_limiter.is_allowed("text_analysis"):
+            status = st.session_state.rate_limiter.get_status("text_analysis")
+            st.warning(f"Rate limit reached. Please wait {status['reset_seconds']}s before trying again.")
+        else:
+            sanitized_content = sanitize_text(text_content)
+            with st.spinner("🤖 Analyzing text content..."):
+                result = st.session_state.text_analyzer.analyze(sanitized_content)
+                
+                st.session_state.data_manager.store_analysis_result(
+                    content_type='text',
+                    content=sanitized_content,
+                    is_inappropriate=result['is_inappropriate'],
+                    confidence_score=result['confidence_score'],
+                    reasons=result['reasons']
+                )
+                
+                display_text_results(result, sanitized_content)
     
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -746,24 +760,34 @@ def show_file_upload_tab():
             analyze_button = st.button("🔍 Analyze File", use_container_width=True, type="primary")
         
         if analyze_button:
-            try:
-                content = uploaded_file.read().decode('utf-8')
-                with st.spinner("🤖 Analyzing file content..."):
-                    result = st.session_state.text_analyzer.analyze(content)
-                    
-                    # Store result
-                    st.session_state.data_manager.store_analysis_result(
-                        content_type='text',
-                        content=content,
-                        is_inappropriate=result['is_inappropriate'],
-                        confidence_score=result['confidence_score'],
-                        reasons=result['reasons'],
-                        filename=uploaded_file.name
-                    )
-                    
-                    display_text_results(result, content, uploaded_file.name)
-            except Exception as e:
-                st.error(f"❌ Error processing file: {str(e)}")
+            if not st.session_state.rate_limiter.is_allowed("text_analysis"):
+                status = st.session_state.rate_limiter.get_status("text_analysis")
+                st.warning(f"Rate limit reached. Please wait {status['reset_seconds']}s before trying again.")
+            else:
+                try:
+                    content = uploaded_file.read().decode('utf-8')
+                    safe_filename = sanitize_filename(uploaded_file.name)
+                    valid, errors = validate_text_input(content)
+                    if not valid:
+                        for error in errors:
+                            st.error(f"Validation error: {error}")
+                    else:
+                        sanitized_content = sanitize_text(content)
+                        with st.spinner("🤖 Analyzing file content..."):
+                            result = st.session_state.text_analyzer.analyze(sanitized_content)
+                            
+                            st.session_state.data_manager.store_analysis_result(
+                                content_type='text',
+                                content=sanitized_content,
+                                is_inappropriate=result['is_inappropriate'],
+                                confidence_score=result['confidence_score'],
+                                reasons=result['reasons'],
+                                filename=safe_filename
+                            )
+                            
+                            display_text_results(result, sanitized_content, safe_filename)
+                except Exception as e:
+                    st.error(f"❌ Error processing file: {str(e)}")
     
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -781,43 +805,47 @@ def show_batch_analysis_tab():
         analyze_button = st.button("🔍 Analyze Batch", use_container_width=True, type="primary")
     
     if analyze_button and batch_text:
-        texts = [line.strip() for line in batch_text.split('\n') if line.strip()]
-        
-        if texts:
-            st.success(f"📝 Processing {len(texts)} text entries...")
-            progress_bar = st.progress(0)
-            results = []
-            
-            for i, text in enumerate(texts):
-                result = st.session_state.text_analyzer.analyze(text)
-                results.append({
-                    'text': text[:100] + '...' if len(text) > 100 else text,
-                    'inappropriate': '🚨 Yes' if result['is_inappropriate'] else '✅ No',
-                    'confidence': f"{result['confidence_score']*100:.1f}%",
-                    'reasons': ', '.join(result['reasons']) if result['reasons'] else 'None'
-                })
+        if not st.session_state.rate_limiter.is_allowed("batch_analysis"):
+            status = st.session_state.rate_limiter.get_status("batch_analysis")
+            st.warning(f"Rate limit reached. Please wait {status['reset_seconds']}s before trying again.")
+        else:
+            valid, errors, sanitized_lines = validate_batch_text(batch_text)
+            if not valid:
+                for error in errors:
+                    st.error(f"Validation error: {error}")
+            elif sanitized_lines:
+                texts = sanitized_lines
+                st.success(f"📝 Processing {len(texts)} text entries...")
+                progress_bar = st.progress(0)
+                results = []
                 
-                # Store individual results
-                st.session_state.data_manager.store_analysis_result(
-                    content_type='text',
-                    content=text,
-                    is_inappropriate=result['is_inappropriate'],
-                    confidence_score=result['confidence_score'],
-                    reasons=result['reasons']
-                )
+                for i, text in enumerate(texts):
+                    result = st.session_state.text_analyzer.analyze(text)
+                    results.append({
+                        'text': text[:100] + '...' if len(text) > 100 else text,
+                        'inappropriate': '🚨 Yes' if result['is_inappropriate'] else '✅ No',
+                        'confidence': f"{result['confidence_score']*100:.1f}%",
+                        'reasons': ', '.join(result['reasons']) if result['reasons'] else 'None'
+                    })
+                    
+                    st.session_state.data_manager.store_analysis_result(
+                        content_type='text',
+                        content=text,
+                        is_inappropriate=result['is_inappropriate'],
+                        confidence_score=result['confidence_score'],
+                        reasons=result['reasons']
+                    )
+                    
+                    progress_bar.progress((i + 1) / len(texts))
                 
-                progress_bar.progress((i + 1) / len(texts))
-            
-            # Display batch results
-            st.subheader("📈 Batch Analysis Results")
-            df = pd.DataFrame(results)
-            st.dataframe(df, use_container_width=True)
-            
-            # Summary stats
-            inappropriate_count = sum(1 for r in results if '🚨' in r['inappropriate'])
-            col1, col2, col3 = st.columns(3)
-            with col2:
-                st.metric("🚨 Flagged Items", f"{inappropriate_count}/{len(results)}")
+                st.subheader("📈 Batch Analysis Results")
+                df = pd.DataFrame(results)
+                st.dataframe(df, use_container_width=True)
+                
+                inappropriate_count = sum(1 for r in results if '🚨' in r['inappropriate'])
+                col1, col2, col3 = st.columns(3)
+                with col2:
+                    st.metric("🚨 Flagged Items", f"{inappropriate_count}/{len(results)}")
     
     st.markdown('</div>', unsafe_allow_html=True)
     
@@ -945,25 +973,31 @@ def show_image_analysis():
             analyze_button = st.button("🔍 Analyze Image", use_container_width=True, type="primary")
         
         if analyze_button:
-            with st.spinner("🤖 Analyzing image content..."):
-                # Convert to bytes for analysis
-                image_bytes = uploaded_file.read()
-                uploaded_file.seek(0)  # Reset file pointer
-                
-                result = st.session_state.image_analyzer.analyze(image_bytes)
-                
-                # Store result
-                st.session_state.data_manager.store_analysis_result(
-                    content_type='image',
-                    content=f"Image file: {uploaded_file.name}",
-                    is_inappropriate=result['is_inappropriate'],
-                    confidence_score=result['confidence_score'],
-                    reasons=result['reasons'],
-                    filename=uploaded_file.name
-                )
-                
-                # Display results with modern styling
-                display_image_results(result, uploaded_file.name)
+            valid, errors = validate_image_upload(uploaded_file)
+            if not valid:
+                for error in errors:
+                    st.error(f"Validation error: {error}")
+            elif not st.session_state.rate_limiter.is_allowed("image_analysis"):
+                status = st.session_state.rate_limiter.get_status("image_analysis")
+                st.warning(f"Rate limit reached. Please wait {status['reset_seconds']}s before trying again.")
+            else:
+                safe_filename = sanitize_filename(uploaded_file.name)
+                with st.spinner("🤖 Analyzing image content..."):
+                    image_bytes = uploaded_file.read()
+                    uploaded_file.seek(0)
+                    
+                    result = st.session_state.image_analyzer.analyze(image_bytes)
+                    
+                    st.session_state.data_manager.store_analysis_result(
+                        content_type='image',
+                        content=f"Image file: {safe_filename}",
+                        is_inappropriate=result['is_inappropriate'],
+                        confidence_score=result['confidence_score'],
+                        reasons=result['reasons'],
+                        filename=safe_filename
+                    )
+                    
+                    display_image_results(result, safe_filename)
     
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -1085,28 +1119,34 @@ def show_video_analysis():
             st.markdown('</div>', unsafe_allow_html=True)
         
         if analyze_button:
-            with st.spinner("🤖 Analyzing video content... This may take a while."):
-                # Save uploaded file temporarily
-                video_bytes = uploaded_file.read()
-                
-                result = st.session_state.video_analyzer.analyze(
-                    video_bytes, 
-                    frame_interval=frame_interval,
-                    max_duration=max_duration
-                )
-                
-                # Store result
-                st.session_state.data_manager.store_analysis_result(
-                    content_type='video',
-                    content=f"Video file: {uploaded_file.name}",
-                    is_inappropriate=result['is_inappropriate'],
-                    confidence_score=result['confidence_score'],
-                    reasons=result['reasons'],
-                    filename=uploaded_file.name
-                )
-                
-                # Display results with modern styling
-                display_video_results(result, uploaded_file.name)
+            valid, errors = validate_video_upload(uploaded_file)
+            if not valid:
+                for error in errors:
+                    st.error(f"Validation error: {error}")
+            elif not st.session_state.rate_limiter.is_allowed("video_analysis"):
+                status = st.session_state.rate_limiter.get_status("video_analysis")
+                st.warning(f"Rate limit reached. Please wait {status['reset_seconds']}s before trying again.")
+            else:
+                safe_filename = sanitize_filename(uploaded_file.name)
+                with st.spinner("🤖 Analyzing video content... This may take a while."):
+                    video_bytes = uploaded_file.read()
+                    
+                    result = st.session_state.video_analyzer.analyze(
+                        video_bytes, 
+                        frame_interval=frame_interval,
+                        max_duration=max_duration
+                    )
+                    
+                    st.session_state.data_manager.store_analysis_result(
+                        content_type='video',
+                        content=f"Video file: {safe_filename}",
+                        is_inappropriate=result['is_inappropriate'],
+                        confidence_score=result['confidence_score'],
+                        reasons=result['reasons'],
+                        filename=safe_filename
+                    )
+                    
+                    display_video_results(result, safe_filename)
     
     st.markdown('</div>', unsafe_allow_html=True)
 
