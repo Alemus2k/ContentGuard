@@ -39,7 +39,7 @@ Preferred communication style: Simple, everyday language.
   - Duration-limited processing for performance
 
 ### Data Storage Solutions
-[This portion was done using Replit, as I have no SQL experience]
+[This portion was done entirely using Replit's agent, thanks to carefully engineered prompts, as I have no SQL experience]
 - **SQLite Database**: 
   - `analysis_results` table for storing content analysis outcomes
   - `user_actions` table for audit trail and user decisions
